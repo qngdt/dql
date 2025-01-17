@@ -6,7 +6,7 @@ import (
 	"dql/dql"
 )
 
-func main() {
+func Fragment() {
 	fragmentB := dql.NewFragment("TestFragB").
 		WithAttributes(
 			dql.NewAttribute("country"),

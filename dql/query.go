@@ -32,9 +32,10 @@ type Query struct {
 //   - A pointer to a Query object.
 //
 // Example:
-//   queryBlock := NewQueryBlock("getUser", "has(user)")
-//   query := NewQuery("GetUserQuery", queryBlock)
-//   fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { } }
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)")
+//	query := NewQuery("GetUserQuery", queryBlock)
+//	fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { } }
 //
 // See: https://dgraph.io/docs/dql/dql-syntax/dql-query
 func NewQuery(name string, queryBlock *QueryBlock) *Query {
@@ -45,7 +46,10 @@ func NewQuery(name string, queryBlock *QueryBlock) *Query {
 }
 
 func (q *Query) concatenate() []string {
-	components := []string{"query", q.Name}
+	components := []string{}
+	if q.Name != "" {
+		components = append(components, "query", q.Name)
+	}
 	if len(q.Params) != 0 {
 		components = append(components, "(")
 		paramComps := make([]string, len(q.Params))
@@ -126,10 +130,11 @@ func (q Query) PrettyPrint() string {
 //   - The updated Query object.
 //
 // Example:
-//   param := NewParam("id", "string").WithDefault("123")
-//   query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
-//       WithParam(param)
-//   fmt.Println(query.String()) // Output: query GetUserQuery($id: string = 123) { getUser(func: has(user)) { } }
+//
+//	param := NewParam("id", "string").WithDefault("123")
+//	query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
+//	    WithParam(param)
+//	fmt.Println(query.String()) // Output: query GetUserQuery($id: string = 123) { getUser(func: has(user)) { } }
 func (q *Query) WithParam(params ...*Param) *Query {
 	for _, p := range params {
 		q.Params = append(q.Params, p)
@@ -146,10 +151,11 @@ func (q *Query) WithParam(params ...*Param) *Query {
 //   - The updated Query object.
 //
 // Example:
-//   varBlock := NewVarBlock("has(user)").WithName("userVar")
-//   query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
-//       WithVarBlocks(varBlock)
-//   fmt.Println(query.String()) // Output: query GetUserQuery { userVar AS var(func: has(user)) { } getUser(func: has(user)) { } }
+//
+//	varBlock := NewVarBlock("has(user)").WithName("userVar")
+//	query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
+//	    WithVarBlocks(varBlock)
+//	fmt.Println(query.String()) // Output: query GetUserQuery { userVar AS var(func: has(user)) { } getUser(func: has(user)) { } }
 func (q *Query) WithVarBlocks(vbs ...*VarBlock) *Query {
 	for _, vb := range vbs {
 		q.VarBlocks = append(q.VarBlocks, vb)
@@ -166,10 +172,11 @@ func (q *Query) WithVarBlocks(vbs ...*VarBlock) *Query {
 //   - The updated Query object.
 //
 // Example:
-//   queryBlock := NewQueryBlock("getUser", "has(user)")
-//   query := NewQuery("GetUserQuery", queryBlock).
-//       WithQueryBlocks(NewQueryBlock("getPosts", "has(post)"))
-//   fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { } getPosts(func: has(post)) { } }
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)")
+//	query := NewQuery("GetUserQuery", queryBlock).
+//	    WithQueryBlocks(NewQueryBlock("getPosts", "has(post)"))
+//	fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { } getPosts(func: has(post)) { } }
 func (q *Query) WithQueryBlocks(qbs ...*QueryBlock) *Query {
 	for _, qb := range qbs {
 		q.QueryBlocks = append(q.QueryBlocks, qb)
@@ -186,10 +193,11 @@ func (q *Query) WithQueryBlocks(qbs ...*QueryBlock) *Query {
 //   - The updated Query object.
 //
 // Example:
-//   fragment := NewFragment("userFragment").WithAttributes(NewAttribute("name"), NewAttribute("age"))
-//   query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
-//       WithFragments(fragment)
-//   fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { ...userFragment } fragment userFragment { name age } }
+//
+//	fragment := NewFragment("userFragment").WithAttributes(NewAttribute("name"), NewAttribute("age"))
+//	query := NewQuery("GetUserQuery", NewQueryBlock("getUser", "has(user)")).
+//	    WithFragments(fragment)
+//	fmt.Println(query.String()) // Output: query GetUserQuery { getUser(func: has(user)) { ...userFragment } fragment userFragment { name age } }
 func (q *Query) WithFragments(fragments ...*Fragment) *Query {
 	for _, f := range fragments {
 		q.Fragments = append(q.Fragments, f)
