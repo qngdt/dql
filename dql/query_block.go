@@ -13,7 +13,7 @@ type QueryBlock struct {
 	Name string
 
 	// Criteria defines the function or condition used in the query block.
-	Criteria string
+	Criteria []string
 
 	// Directives is a list of directives applied to the query block.
 	Directives []string
@@ -26,22 +26,44 @@ type QueryBlock struct {
 //
 // Parameters:
 //   - name: The name of the query block.
-//   - criteria: The function or condition used in the query block.
+//   - criteria: The root criteria of the query block.
 //
 // Returns:
 //   - A pointer to a QueryBlock object.
 //
 // Example:
-//   queryBlock := NewQueryBlock("getUser", "has(user)")
-//   fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) { }
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)")
+//	fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) { }
 //
 // See: https://dgraph.io/docs/dql/dql-syntax/dql-query/#query-block
 func NewQueryBlock(name string, criteria string) *QueryBlock {
 	return &QueryBlock{
-		Name:     name,
-		Criteria: criteria,
+		Name:      name,
+		Criteria: []string{criteria},
 	}
 }
+
+// WithCriteria adds one or more criteria to the query block.
+//
+// Parameters:
+//   - criteria: One or more criteria to add to the query block.
+//
+// Returns:
+//   - The updated QueryBlock object.
+//
+// Example:
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)").
+//	    WithCriteria("orderasc: name@en")
+//	fmt.Println(queryBlock.String()) // Output: getUser(func: has(user), orderasc: name@en) { }
+func (qb *QueryBlock) WithCriteria(criteria ...string) *QueryBlock {
+	for _, c := range criteria {
+		qb.Criteria = append(qb.Criteria, c)
+	}
+	return qb
+}
+
 
 // WithDirectives adds one or more directives to the query block.
 //
@@ -52,9 +74,10 @@ func NewQueryBlock(name string, criteria string) *QueryBlock {
 //   - The updated QueryBlock object.
 //
 // Example:
-//   queryBlock := NewQueryBlock("getUser", "has(user)").
-//       WithDirectives("@filter(eq(name, \"John\"))")
-//   fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) @filter(eq(name, "John")) { }
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)").
+//	    WithDirectives("@filter(eq(name, \"John\"))")
+//	fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) @filter(eq(name, "John")) { }
 func (qb *QueryBlock) WithDirectives(directives ...string) *QueryBlock {
 	for _, d := range directives {
 		qb.Directives = append(qb.Directives, d)
@@ -71,9 +94,10 @@ func (qb *QueryBlock) WithDirectives(directives ...string) *QueryBlock {
 //   - The updated QueryBlock object.
 //
 // Example:
-//   queryBlock := NewQueryBlock("getUser", "has(user)").
-//       WithAttributes(NewAttribute("name"), NewAttribute("age"))
-//   fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) { name age }
+//
+//	queryBlock := NewQueryBlock("getUser", "has(user)").
+//	    WithAttributes(NewAttribute("name"), NewAttribute("age"))
+//	fmt.Println(queryBlock.String()) // Output: getUser(func: has(user)) { name age }
 func (qb *QueryBlock) WithAttributes(attrs ...*Attribute) *QueryBlock {
 	for _, a := range attrs {
 		qb.Attributes = append(qb.Attributes, a)
@@ -88,7 +112,7 @@ func (qb *QueryBlock) WithAttributes(attrs ...*Attribute) *QueryBlock {
 // Returns:
 //   - A string representation of the query block.
 func (qb *QueryBlock) String() string {
-	components := []string{qb.Name, fmt.Sprintf("(func: %s)", qb.Criteria)}
+	components := []string{qb.Name, fmt.Sprintf("(func: %s)", strings.Join(qb.Criteria, ", "))}
 	for _, f := range qb.Directives {
 		components = append(components, f)
 	}

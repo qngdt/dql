@@ -118,6 +118,7 @@ fmt.Println(query.PrettyPrint())
 ### QueryBlock
 
 - `NewQueryBlock(name string, criteria string) *QueryBlock`: Creates a new query block.
+- `WithCriteria(criteria ...string) *QueryBlock`: Adds one or more criteria to the query block.
 - `WithDirectives(directives ...string) *QueryBlock`: Adds directives to the query block.
 - `WithAttributes(attrs ...*Attribute) *QueryBlock`: Adds attributes to the query block.
 - `String() string`: Generates a string representation of the query block.
@@ -126,6 +127,7 @@ fmt.Println(query.PrettyPrint())
 
 - `NewVarBlock(criteria string) *VarBlock`: Creates a new variable block.
 - `WithName(name string) *VarBlock`: Sets the name of the variable block.
+- `WithCriteria(criteria ...string) *VarBlock`: Adds one or more criteria to the variable block.
 - `WithDirectives(directives ...string) *VarBlock`: Adds directives to the variable block.
 - `WithAttributes(attrs ...*Attribute) *VarBlock`: Adds attributes to the variable block.
 - `String() string`: Generates a string representation of the variable block.

@@ -13,7 +13,7 @@ type VarBlock struct {
 	Name string
 
 	// Criteria defines the function or condition used in the variable block.
-	Criteria string
+	Criteria []string
 
 	// Attributes is a list of attributes included in the variable block.
 	Attributes []*Attribute
@@ -31,13 +31,14 @@ type VarBlock struct {
 //   - A pointer to a VarBlock object.
 //
 // Example:
-//   varBlock := NewVarBlock("has(user)")
-//   fmt.Println(varBlock.String()) // Output: var(func: has(user)) { }
+//
+//	varBlock := NewVarBlock("has(user)")
+//	fmt.Println(varBlock.String()) // Output: var(func: has(user)) { }
 //
 // See: https://dgraph.io/docs/dql/dql-syntax/dql-query/#variable-var-block
 func NewVarBlock(criteria string) *VarBlock {
 	return &VarBlock{
-		Criteria: criteria,
+		Criteria: []string{criteria},
 	}
 }
 
@@ -50,11 +51,32 @@ func NewVarBlock(criteria string) *VarBlock {
 //   - The updated VarBlock object.
 //
 // Example:
-//   varBlock := NewVarBlock("has(user)").WithName("userVar")
-//   fmt.Println(varBlock.String()) // Output: userVar AS var(func: has(user)) { }
+//
+//	varBlock := NewVarBlock("has(user)").WithName("userVar")
+//	fmt.Println(varBlock.String()) // Output: userVar AS var(func: has(user)) { }
 func (vb *VarBlock) WithName(name string) *VarBlock {
 	vb.Name = name
 	return vb
+}
+
+// WithCriteria adds one or more criteria to the var block.
+//
+// Parameters:
+//   - criteria: One or more criteria to add to the var block.
+//
+// Returns:
+//   - The updated VarBlock object.
+//
+// Example:
+//
+//	varBlock := NewVarBlock("has(user)").
+//	    WithCriteria("orderasc: name@en")
+//	fmt.Println(varBlock.String()) // Output: var(func: has(user), orderasc: name@en) { }
+func (qb *VarBlock) WithCriteria(criteria ...string) *VarBlock {
+	for _, c := range criteria {
+		qb.Criteria = append(qb.Criteria, c)
+	}
+	return qb
 }
 
 // WithDirectives adds one or more directives to the variable block.
@@ -66,9 +88,10 @@ func (vb *VarBlock) WithName(name string) *VarBlock {
 //   - The updated VarBlock object.
 //
 // Example:
-//   varBlock := NewVarBlock("has(user)").
-//       WithDirectives("@filter(eq(name, \"John\"))")
-//   fmt.Println(varBlock.String()) // Output: var(func: has(user)) @filter(eq(name, "John")) { }
+//
+//	varBlock := NewVarBlock("has(user)").
+//	    WithDirectives("@filter(eq(name, \"John\"))")
+//	fmt.Println(varBlock.String()) // Output: var(func: has(user)) @filter(eq(name, "John")) { }
 func (vb *VarBlock) WithDirectives(directives ...string) *VarBlock {
 	for _, d := range directives {
 		vb.Directives = append(vb.Directives, d)
@@ -85,9 +108,10 @@ func (vb *VarBlock) WithDirectives(directives ...string) *VarBlock {
 //   - The updated VarBlock object.
 //
 // Example:
-//   varBlock := NewVarBlock("has(user)").
-//       WithAttributes(NewAttribute("name"), NewAttribute("age"))
-//   fmt.Println(varBlock.String()) // Output: var(func: has(user)) { name age }
+//
+//	varBlock := NewVarBlock("has(user)").
+//	    WithAttributes(NewAttribute("name"), NewAttribute("age"))
+//	fmt.Println(varBlock.String()) // Output: var(func: has(user)) { name age }
 func (vb *VarBlock) WithAttributes(attrs ...*Attribute) *VarBlock {
 	for _, a := range attrs {
 		vb.Attributes = append(vb.Attributes, a)
@@ -106,7 +130,7 @@ func (vb *VarBlock) String() string {
 	if vb.Name != "" {
 		components = append(components, vb.Name, "AS")
 	}
-	components = append(components, "var", fmt.Sprintf("(func: %s)", vb.Criteria))
+	components = append(components, "var", fmt.Sprintf("(func: %s)", strings.Join(vb.Criteria, ", ")))
 	for _, f := range vb.Directives {
 		components = append(components, f)
 	}
